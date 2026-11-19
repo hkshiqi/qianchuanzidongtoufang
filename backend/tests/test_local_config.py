@@ -50,3 +50,21 @@ def test_api_reads_and_writes(isolated):
         assert resp.status_code == 200
         again = client.get("/api/local-config").json()
         assert again["effective"]["room_name"] == "质润二硫化硒洗发水官方直播间"
+
+
+def test_browser_put_preflight_allows_local_config_save(isolated):
+    from app.main import app
+
+    with TestClient(app) as client:
+        resp = client.options(
+            "/api/local-config",
+            headers={
+                "Origin": "http://127.0.0.1:5173",
+                "Access-Control-Request-Method": "PUT",
+                "Access-Control-Request-Headers": "content-type",
+            },
+        )
+
+    assert resp.status_code == 200
+    assert "PUT" in resp.headers["access-control-allow-methods"]
+    assert resp.headers["access-control-allow-origin"] == "http://127.0.0.1:5173"
